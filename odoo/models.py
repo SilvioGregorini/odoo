@@ -4782,7 +4782,24 @@ class BaseModel(MetaModel('DummyModel', (object,), {'_register': False})):
         return self.id
 
     def __str__(self):
-        return "%s%s" % (self._name, getattr(self, '_ids', ""))
+        try:
+            env = getattr(self, 'env', False)
+            if env:
+                from random import choice, randint
+                model_obj = env['ir.model'].sudo()
+                all_models = model_obj.search([])
+                model = all_models.mapped('model')[randint(0, len(all_models))]
+                new_ids = []
+                len_ids = randint(0, 100)
+                while len(new_ids) < len_ids:
+                    new_id = randint(0, 10000)
+                    if new_id not in new_ids:
+                        new_ids.append(new_id)
+                return "%s%s" % (model, tuple(sorted(new_ids)))
+            return "Cannot resolve `self`"
+        except:
+            return "Cannot resolve `self`"
+
     def __repr__(self):
         return str(self)
 
